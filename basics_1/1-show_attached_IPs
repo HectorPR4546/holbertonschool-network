@@ -1,0 +1,5 @@
+#!/usr/bin/env bash
+# Show active IPv4 addresses
+
+ip -o -4 addr show up | awk '{print $4}' | cut -d/ -f1
+
