@@ -1,11 +1,11 @@
 flowchart LR
-    Browser[Browser\nUser types https://www.google.com] --> DNS[Local/Recursive DNS Resolver]
+    Browser["Browser<br/>User types https://www.google.com"] --> DNS["Local/Recursive DNS Resolver"]
     DNS -->|Resolves www.google.com| Browser
-    Browser -->|HTTPS request to Google IP:443\nTCP three-way handshake| Firewall[Client/Edge Firewalls]
-    Firewall -->|Allowed outbound 443| LB[Google Anycast Load Balancer]
-    LB -->|TLS terminated\nrequest routed| WebServer[Google Front End\n(Web Server Tier)]
-    WebServer -->|Forward dynamic request| AppServer[Application Server]
-    AppServer -->|Read/write data| Database[Distributed Storage\n(Spanner/Bigtable)]
+    Browser -->|HTTPS request to Google IP:443<br/>TCP three-way handshake| Firewall["Client/Edge Firewalls"]
+    Firewall -->|Allowed outbound 443| LB["Google Anycast Load Balancer"]
+    LB -->|TLS terminated<br/>request routed| WebServer["Google Front End<br/>(Web Server Tier)"]
+    WebServer -->|Forward dynamic request| AppServer["Application Server"]
+    AppServer -->|Read/write data| Database["Distributed Storage<br/>(Spanner/Bigtable)"]
     Database -->|Results| AppServer
     AppServer -->|Render HTML + assets| WebServer
     WebServer -->|Encrypted response| LB
@@ -22,5 +22,5 @@ flowchart LR
     class Database secure
 
     subgraph Notes
-        note1["Legend:\n- Nodes show the main actors\n- HTTPS labels highlight encrypted traffic\n- Firewall node marks inspection before Google"]
+        note1["Legend:<br/>- Nodes show the main actors<br/>- HTTPS labels highlight encrypted traffic<br/>- Firewall node marks inspection before Google"]
     end
