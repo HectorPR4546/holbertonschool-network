@@ -1,0 +1,26 @@
+flowchart LR
+    Browser[Browser\nUser types https://www.google.com] --> DNS[Local/Recursive DNS Resolver]
+    DNS -->|Resolves www.google.com| Browser
+    Browser -->|HTTPS request to Google IP:443\nTCP three-way handshake| Firewall[Client/Edge Firewalls]
+    Firewall -->|Allowed outbound 443| LB[Google Anycast Load Balancer]
+    LB -->|TLS terminated\nrequest routed| WebServer[Google Front End\n(Web Server Tier)]
+    WebServer -->|Forward dynamic request| AppServer[Application Server]
+    AppServer -->|Read/write data| Database[Distributed Storage\n(Spanner/Bigtable)]
+    Database -->|Results| AppServer
+    AppServer -->|Render HTML + assets| WebServer
+    WebServer -->|Encrypted response| LB
+    LB -->|HTTPS response| Firewall
+    Firewall -->|Decrypted by browser| Browser
+
+    classDef secure fill:#cce5ff,stroke:#1d70b8,stroke-width:1px;
+    class Browser secure
+    class DNS secure
+    class Firewall secure
+    class LB secure
+    class WebServer secure
+    class AppServer secure
+    class Database secure
+
+    subgraph Notes
+        note1["Legend:\n- Nodes show the main actors\n- HTTPS labels highlight encrypted traffic\n- Firewall node marks inspection before Google"]
+    end
