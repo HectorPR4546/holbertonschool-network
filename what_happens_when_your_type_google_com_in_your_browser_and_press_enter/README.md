@@ -4,6 +4,6 @@
 - **Blog post**: [0-blog_post](0-blog_post)
 - **Diagram (Mermaid)**: [1-what_happen_when_diagram.mmd](1-what_happen_when_diagram.mmd)
 
-The blog post breaks down the full journey of `https://www.google.com` across DNS, TCP/IP, firewalls, TLS, load balancing, web tier, application tier, and storage.
+The blog post walks through the full journey of `https://www.google.com`, covering DNS, TCP/IP, firewall checks, TLS, load balancing, web and application servers, and the database layer.
 
-The Mermaid diagram file shows the same path: browser --> DNS --> encrypted request through the firewall --> load balancer --> web server --> application server --> database and back. Render it using any Mermaid-capable viewer (for example https://mermaid.live) and export an image for submission.
+The Mermaid diagram file mirrors that flow from the browser to Google and back.
