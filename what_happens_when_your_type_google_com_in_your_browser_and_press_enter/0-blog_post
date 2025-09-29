@@ -1,0 +1,38 @@
+# When I hit Enter on https://www.google.com
+
+Whenever I teach someone about networking, I like to frame it as a neighborhood gossip chain. One curious neighbor (my browser) passes a question through the block, each specialist adds their piece, and eventually Google shouts back the answer. Here is the play-by-play the last time I opened `https://www.google.com`.
+
+## First, the browser gets its act together
+My browser double-checks that I really want HTTPS and trims the URL to `https://www.google.com/`. Before it asks anyone for help, it rummages through local caches: "Do I already know Google's IP? Do I have a fresh copy of the home page saved?" If any cache hits, things end here. Usually I end up forcing a fresh load, so the rest of the story kicks in.
+
+## DNS: finding Google's street address
+With no cached address, my laptop sends a DNS request to its resolver (in my apartment that's the Wi-Fi router). The resolver either answers from memory or goes hunting: first the root servers, then the `.com` crew, and finally Google's own DNS servers. They return a handful of IP addresses, because Google wants me to pick whichever server feels closest. Now I know where to drive the packets.
+
+## TCP/IP: setting up a lane on the highway
+Armed with an IP and port 443, the browser opens a TCP connection. The classic three-way handshake--SYN, SYN/ACK, ACK--flies over the network. Each packet carries IP headers so routers can move it along the backbone. On my side, the home router rewrites the source port with NAT so several devices in the house can share the same public IP. Once the handshake finishes, I have a reliable lane carved out to Google's edge.
+
+## Firewalls: bouncers along the path
+Before that SYN leaves my laptop, the local firewall takes a quick look: "Is outbound HTTPS allowed?" In a corporate network this is where rules often block strange destinations. Google's edge has its own firewalls doing the same: rate limiting sketchy sources, dropping malformed packets, and keeping the bad actors out. Only after both sides are happy does the conversation continue.
+
+## HTTPS/SSL: proving trust and agreeing on secrecy
+Now TLS (still called SSL by half the planet) gets to work. My browser sends a ClientHello listing supported cipher suites. Google's reply includes its certificate chain. The browser validates that certificate against the trusted Certificate Authorities it ships with--no green lock if that fails. With trust established, the two sides perform an ephemeral key exchange (these days usually ECDHE), derive symmetric keys, and flip on encryption and integrity checks. From this point on, anyone sniffing the network sees only ciphertext.
+
+## Load balancer: Google picks the right helper
+The first Google machine that greets me is typically a global load balancer. Thanks to anycast, my packets land at the nearest Google point of presence. The load balancer terminates TLS, studies my request, and figures out which backend cluster should take over. It balances traffic based on geography, current load, and what is already cached nearby. That decision keeps response times low even during peak hours.
+
+## Web server: the front door logic
+Once routed, the HTTP request lands on a web server tier--think of the Google Front Ends. These servers unwrap the HTTP headers, check cookies, apply compression settings, and log the visit. If the requested asset is something simple that lives in cache, the web server can answer right away. Otherwise, it forwards the request to the deeper application logic.
+
+## Application server: making sense of the search
+The application layer reads the path (`/`), query parameters, language settings, user preferences, and whatever cookies survived. It builds the search intent, assembles personalization info, and fans out to internal microservices: autocomplete, ads, safe search, you name it. Google relies heavily on RPC calls, so this step might involve dozens of quick conversations inside their data center.
+
+## Database and storage: digging up the facts
+Those microservices lean on Google's storage stack--think Spanner, Bigtable, Colossus. They are distributed databases and file systems that hold crawled pages, ranking signals, user profiles, and session data. Replication and sharding keep the data close to users and resilient to hardware failure. The application server pulls whatever documents, metadata, and models it needs to craft the results page.
+
+## Sending the response back home
+With the data gathered, the application server assembles the HTML (plus references to CSS, JS, and images) and hands it to the web tier. The web server wraps everything in an HTTP response, adds headers like cache-control and cookies, then gives it back to the load balancer. The load balancer ships it over the already-established TLS/TCP session. Each packet retraces the route across the internet, back through my router, and up to the browser.
+
+## Rendering: what I finally see
+My browser decrypts the packets, reads the HTTP response, and starts building the DOM. It streams in external assets, spins up JavaScript engines, and paints the familiar search box almost immediately. HTTP/2 keeps the TCP connection warm so the next search can reuse it. When I finally close the tab, TCP winds down gracefully with a FIN/ACK exchange and the OS releases the port.
+
+That entire chain happens in a blink--DNS, TCP/IP, firewalls, TLS, load balancing, web servers, application servers, and databases all doing their part. The more I dig into it, the more I appreciate how many teams had to get their pieces right to make a single search bar appear.
